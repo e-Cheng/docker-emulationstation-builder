@@ -1,0 +1,20 @@
+FROM ubuntu AS builder
+
+ARG LANG=
+ARG REPO=
+
+RUN apt-get update \
+    && apt-get -y upgrade \
+    && apt-get install -y lsb-release libsdl2-dev libboost-system-dev libboost-filesystem-dev libboost-date-time-dev libboost-locale-dev libfreeimage-dev libfreetype6-dev libeigen3-dev libcurl4-openssl-dev libasound2-dev libgl1-mesa-dev build-essential cmake git \
+    && mkdir /retropie && git clone --depth=1 https://github.com/RetroPie/RetroPie-Setup.git /retropie && cd /retropie \
+    && chmod +x retropie_setup.sh \
+    && ./retropie_packages.sh setup basic_install \
+    && LANG=${LANG} \
+    && mkdir /es && git clone --recursive ${REPO} /es && cd /es \
+    && mkdir build && cd build \
+    && cmake .. \
+    && make \
+    && cp /es/emulationstation /opt/retropie/supplementary/emulationstation/ \
+    && cp -r /es/locale /opt/retropie/supplementary/emulationstation/
+
+ENTRYPOINT tail -f /dev/null
